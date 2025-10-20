@@ -3,7 +3,7 @@
         <div class="general-header">
             <div class="header-app">
                 <img :src="logotipo" :alt="logotipo" class="logo-app" />
-                <h4 class="titulo-app">VERIFICACIÓN PUERTAS, VENTANAS Y BARRERAS INTERIORES</h4>
+                <h4 class="titulo-app">LISTA DE CHEQUEO - CONTROL FÍSICO Y SEGURIDAD (Almacén / Sede Administrativa)</h4>
             </div>
         </div>
         <div class="row">
@@ -12,39 +12,211 @@
                     <form @submit.prevent="guardarVerificacion">
                         <div class="row mb-4">
                             <div class="col-md-4">
-                                <label class="form-label"><strong>Nombre quien verifica:</strong></label>
-                                <select class="form-select" v-model="usuario">
+                                <label class="form-label"><strong>Lugar de inspección:</strong></label>
+                                <select class="form-select" v-model="lugarInspeccionId">
                                     <option value="null">Seleccione</option>
-                                    <option key="RTORRES" value="RTORRES">RTORRES</option>
-                                    <option key="RODRIGUEZC" value="RODRIGUEZC">RODRIGUEZC</option>
+                                    <option v-for="lugar in lugaresInspeccion" :key="lugar.id" :value="lugar.id">
+                                        {{ lugar.nombre }}
+                                    </option>
                                 </select>
                             </div>
-
-                            <div class="col-md-12 mt-3">
-                                <label class="form-label"><strong>Verificación de elementos</strong></label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="puertas" v-model="puertas" >
-                                    <label class="form-check-label" for="puertas">Puertas</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="ventanas" v-model="ventanas" >
-                                    <label class="form-check-label" for="ventanas">Ventanas</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="iluminacionOficinas" v-model="iluminacionOficinas" >
-                                    <label class="form-check-label" for="iluminacionOficinas">Iluminación Oficinas</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="barrerasInteriores" v-model="barrerasInteriores" >
-                                    <label class="form-check-label" for="barrerasInteriores">Barreras Interiores</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="estadoCamaras" v-model="estadoCamaras" >
-                                    <label class="form-check-label" for="estadoCamaras">Estado Cámaras</label>
-                                </div>
+                            <div class="col-md-4">
+                                <label class="form-label"><strong>Cargo quien verifica:</strong></label>
+                                <select class="form-select" v-model="cargo" :disabled="!lugarInspeccionId || lugarInspeccionId === 'null'">
+                                    <option value="null">Seleccione</option>
+                                    <option v-for="responsable in responsables" :key="responsable.id" :value="responsable.id">
+                                        {{ responsable.nombre }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
-                        <div class="row mb-3">
+
+                        <!-- Tabla de verificación -->
+                        <div class="tabla-verificacion-container">
+                            <table class="tabla-verificacion">
+                                <thead>
+                                    <tr>
+                                        <th class="col-aspecto">ASPECTOS PARA VERIFICAR</th>
+                                        <th class="col-opcion">SI</th>
+                                        <th class="col-opcion">NO</th>
+                                        <th class="col-opcion">N/A</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">1</span> Cuenta con iluminación suficiente y funcional para operaciones seguras.</td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_1" value="1" v-model="aspectosGenerales.aspecto_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_1" value="0" v-model="aspectosGenerales.aspecto_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_1" value="2" v-model="aspectosGenerales.aspecto_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2</span> La carga está organizada según el tipo de material, sin obstruir pasillos o accesos.</td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_2" value="1" v-model="aspectosGenerales.aspecto_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_2" value="0" v-model="aspectosGenerales.aspecto_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_2" value="2" v-model="aspectosGenerales.aspecto_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">3</span> Cuenta con los equipos necesarios (carretillas, estibas, elementos de seguridad) para la manipulación segura de carga suelta.</td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_3" value="1" v-model="aspectosGenerales.aspecto_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_3" value="0" v-model="aspectosGenerales.aspecto_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_3" value="2" v-model="aspectosGenerales.aspecto_3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">4</span> El área destinada al almacenamiento de carga está claramente delimitadas y señalizadas.</td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_4" value="1" v-model="aspectosGenerales.aspecto_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_4" value="0" v-model="aspectosGenerales.aspecto_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="aspecto_4" value="2" v-model="aspectosGenerales.aspecto_4"></td>
+                                    </tr>
+
+                                    <!-- Sección 1: Paredes -->
+                                    <tr class="seccion-header">
+                                        <td colspan="4">1. PAREDES</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">1.1</span> Sin grietas, roturas, humedad, fisuras o signos de deterioro estructural.</td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_1" value="1" v-model="paredes.paredes_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_1" value="0" v-model="paredes.paredes_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_1" value="2" v-model="paredes.paredes_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">1.2</span> La pintura o recubrimiento está en buen estado, sin desprendimientos ni corrosión.</td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_2" value="1" v-model="paredes.paredes_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_2" value="0" v-model="paredes.paredes_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_2" value="2" v-model="paredes.paredes_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">1.3</span> Señalización visible de rutas de evacuación, zonas de seguridad o advertencias.</td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_3" value="1" v-model="paredes.paredes_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_3" value="0" v-model="paredes.paredes_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_3" value="2" v-model="paredes.paredes_3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">1.4</span> Muros o cerramientos laterales no presentan huecos, aberturas ni accesos vulnerables.</td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_4" value="1" v-model="paredes.paredes_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_4" value="0" v-model="paredes.paredes_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="paredes_4" value="2" v-model="paredes.paredes_4"></td>
+                                    </tr>
+
+                                    <!-- Sección 2: Puertas interiores/exteriores -->
+                                    <tr class="seccion-header">
+                                        <td colspan="4">2. PUERTAS INTERIORES/EXTERIORES</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2.1</span> Estructura sin daños, abolladuras, corrosión o deformaciones.</td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_1" value="1" v-model="puertas.puertas_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_1" value="0" v-model="puertas.puertas_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_1" value="2" v-model="puertas.puertas_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2.2</span> Abre y cierra correctamente, sin forzar mecanismos de cerraduras.</td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_2" value="1" v-model="puertas.puertas_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_2" value="0" v-model="puertas.puertas_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_2" value="2" v-model="puertas.puertas_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2.3</span> Cuenta con señalización conforme a su función.</td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_3" value="1" v-model="puertas.puertas_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_3" value="0" v-model="puertas.puertas_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_3" value="2" v-model="puertas.puertas_3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2.4</span> Bisagras, rieles o estera sin desgaste excesivo, roturas o piezas sueltas.</td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_4" value="1" v-model="puertas.puertas_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_4" value="0" v-model="puertas.puertas_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_4" value="2" v-model="puertas.puertas_4"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">2.5</span> Ningún objeto bloquea el acceso o la salida.</td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_5" value="1" v-model="puertas.puertas_5"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_5" value="0" v-model="puertas.puertas_5"></td>
+                                        <td class="opcion-cell"><input type="radio" name="puertas_5" value="2" v-model="puertas.puertas_5"></td>
+                                    </tr>
+
+                                    <!-- Sección 3: Piso -->
+                                    <tr class="seccion-header">
+                                        <td colspan="4">3. PISO</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">3.1</span> Superficie nivelada, sin hundimientos, grietas profundas, roturas o desgaste excesivo.</td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_1" value="1" v-model="piso.piso_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_1" value="0" v-model="piso.piso_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_1" value="2" v-model="piso.piso_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">3.2</span> Piso libre de polvo, residuos, derrames, materiales sueltos u otros contaminantes.</td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_2" value="1" v-model="piso.piso_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_2" value="0" v-model="piso.piso_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_2" value="2" v-model="piso.piso_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">3.3</span> Líneas o marcas visibles para zonas de almacenamiento, tránsito y seguridad.</td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_3" value="1" v-model="piso.piso_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_3" value="0" v-model="piso.piso_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_3" value="2" v-model="piso.piso_3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">3.4</span> Zonas húmedas, filtraciones o acumulaciones de agua.</td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_4" value="1" v-model="piso.piso_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_4" value="0" v-model="piso.piso_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="piso_4" value="2" v-model="piso.piso_4"></td>
+                                    </tr>
+
+                                    <!-- Sección 4: Techo interior/exterior -->
+                                    <tr class="seccion-header">
+                                        <td colspan="4">4. TECHO INTERIOR/EXTERIOR</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">4.1</span> Detectan signos de filtración de agua, humedad o acumulación de moho.</td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_1" value="1" v-model="techo.techo_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_1" value="0" v-model="techo.techo_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_1" value="2" v-model="techo.techo_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">4.2</span> Material aislante en buen estado, sin desprendimientos, cortes o desgaste.</td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_2" value="1" v-model="techo.techo_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_2" value="0" v-model="techo.techo_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_2" value="2" v-model="techo.techo_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">4.3</span> Luminarias, sensores u otros equipos están firmemente sujetos y operativos.</td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_3" value="1" v-model="techo.techo_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_3" value="0" v-model="techo.techo_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="techo_3" value="2" v-model="techo.techo_3"></td>
+                                    </tr>
+
+                                    <!-- Sección 5: Seguridad -->
+                                    <tr class="seccion-header">
+                                        <td colspan="4">5. SEGURIDAD</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">5.1</span> Cámaras de videovigilancia instaladas y ubicadas en puntos estratégicos, en funcionamiento y cobertura total de la carga.</td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_1" value="1" v-model="seguridad.seguridad_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_1" value="0" v-model="seguridad.seguridad_1"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_1" value="2" v-model="seguridad.seguridad_1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">5.2</span> Se lleva registro físico o digital de personas, vehículos o visitas.</td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_2" value="1" v-model="seguridad.seguridad_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_2" value="0" v-model="seguridad.seguridad_2"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_2" value="2" v-model="seguridad.seguridad_2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">5.3</span> Se informa la existencia de videovigilancia con señalización visible.</td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_3" value="1" v-model="seguridad.seguridad_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_3" value="0" v-model="seguridad.seguridad_3"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_3" value="2" v-model="seguridad.seguridad_3"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="aspecto-cell"><span class="numero-badge">5.4</span> Hay vigilancia física activa (guardias) según turno.</td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_4" value="1" v-model="seguridad.seguridad_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_4" value="0" v-model="seguridad.seguridad_4"></td>
+                                        <td class="opcion-cell"><input type="radio" name="seguridad_4" value="2" v-model="seguridad.seguridad_4"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mb-3 mt-4">
                             <div class="col-md-12">
                                 <label class="form-label"><strong>Novedades</strong></label>        
                                 <textarea 
@@ -75,8 +247,9 @@
                                     <label for="fechaHasta">Hasta:</label>
                                     <input type="date" class="form-control mb-3" v-model="fechaHasta">
                                 </div>
-                                <div style="align-self: center;">
+                                <div style="align-self: center; display: flex; gap: 0.5rem;">
                                     <button class="btn btn-primary" @click="cargarDatos()">Filtrar</button>
+                                    <button class="btn btn-danger" @click="limpiarFiltros()">Limpiar filtros</button>
                                 </div>
                             </div>
                             <div style="align-self: center;">
@@ -91,12 +264,32 @@
                               <thead>
                                   <tr>
                                       <th>ID</th>
-                                      <th>USUARIO</th>
-                                      <th>PUERTAS</th>
-                                      <th>VENTANAS</th>
-                                      <th>ILUMINACIÓN OFICINAS</th>
-                                      <th>BARRERAS INTERIORES</th>
-                                      <th>ESTADO CÁMARAS</th>
+                                      <th>LUGAR INSPECCIÓN</th>
+                                      <th>RESPONSABLE</th>
+                                      <th>ASPECTOS 1</th>
+                                      <th>ASPECTOS 2</th>
+                                      <th>ASPECTOS 3</th>
+                                      <th>ASPECTOS 4</th>
+                                      <th>PAREDES 1</th>
+                                      <th>PAREDES 2</th>
+                                      <th>PAREDES 3</th>
+                                      <th>PAREDES 4</th>
+                                      <th>PUERTAS 1</th>
+                                      <th>PUERTAS 2</th>
+                                      <th>PUERTAS 3</th>
+                                      <th>PUERTAS 4</th>
+                                      <th>PUERTAS 5</th>
+                                      <th>PISOS 1</th>
+                                      <th>PISOS 2</th>
+                                      <th>PISOS 3</th>
+                                      <th>PISOS 4</th>
+                                      <th>TECHO 1</th>
+                                      <th>TECHO 2</th>
+                                      <th>TECHO 3</th>
+                                      <th>SEGURIDAD 1</th>
+                                      <th>SEGURIDAD 2</th>
+                                      <th>SEGURIDAD 3</th>
+                                      <th>SEGURIDAD 4</th>
                                       <th>NOVEDADES</th>
                                       <th>FECHA CREACIÓN</th>
                                   </tr>
@@ -104,12 +297,32 @@
                               <tbody>
                                   <tr v-for="reg in registros" :key="reg.id">
                                       <td>{{ reg.id }}</td>
-                                      <td>{{ reg.usuario }}</td>
-                                      <td>{{ reg.puertas }}</td>
-                                      <td>{{ reg.ventanas }}</td>
-                                      <td>{{ reg.iluminacion_oficinas }}</td>
-                                      <td>{{ reg.barreras_interiores }}</td>
-                                      <td>{{ reg.estado_camaras }}</td>
+                                      <td>{{ reg.lugar_inspeccion }}</td>
+                                      <td>{{ reg.responsable_verificacion }}</td>
+                                      <td>{{ reg.aspectos_1 }}</td>
+                                      <td>{{ reg.aspectos_2 }}</td>
+                                      <td>{{ reg.aspectos_3 }}</td>
+                                      <td>{{ reg.aspectos_4 }}</td>
+                                      <td>{{ reg.paredes_1 }}</td>
+                                      <td>{{ reg.paredes_2 }}</td>
+                                      <td>{{ reg.paredes_3 }}</td>
+                                      <td>{{ reg.paredes_4 }}</td>
+                                      <td>{{ reg.puertas_1 }}</td>
+                                      <td>{{ reg.puertas_2 }}</td>
+                                      <td>{{ reg.puertas_3 }}</td>
+                                      <td>{{ reg.puertas_4 }}</td>
+                                      <td>{{ reg.puertas_5 }}</td>
+                                      <td>{{ reg.pisos_1 }}</td>
+                                      <td>{{ reg.pisos_2 }}</td>
+                                      <td>{{ reg.pisos_3 }}</td>
+                                      <td>{{ reg.pisos_4 }}</td>
+                                      <td>{{ reg.techo_1 }}</td>
+                                      <td>{{ reg.techo_2 }}</td>
+                                      <td>{{ reg.techo_3 }}</td>
+                                      <td>{{ reg.seguridad_1 }}</td>
+                                      <td>{{ reg.seguridad_2 }}</td>
+                                      <td>{{ reg.seguridad_3 }}</td>
+                                      <td>{{ reg.seguridad_4 }}</td>
                                       <td>{{ reg.novedades }}</td>
                                       <td>{{ reg.fecha_creacion }}</td>
                                   </tr>
@@ -217,25 +430,65 @@
 
 <script setup>
 
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { Modal } from 'bootstrap';
 import logotipo from '@/assets/logotipo.png';
 import apiUrl from "../../config.js";
 
-const usuario = ref(null);
+const cargo = ref(null);
+const lugarInspeccionId = ref(null);
+const lugaresInspeccion = ref([]);
+const responsables = ref([]);
 const fechaDesde = ref(null);
 const fechaHasta = ref(null);
 const fechaDesdeFormateada = ref(null);
 const fechaHastaFormateada = ref(null);
 
-// Checkboxes
-const puertas = ref(false);
-const ventanas = ref(false);
-const iluminacionOficinas = ref(false);
-const barrerasInteriores = ref(false);
-const estadoCamaras = ref(false);
+// Objetos separados por sección para almacenar los aspectos verificados
+const aspectosGenerales = ref({
+    aspecto_1: null,
+    aspecto_2: null,
+    aspecto_3: null,
+    aspecto_4: null,
+});
+
+const paredes = ref({
+    paredes_1: null,
+    paredes_2: null,
+    paredes_3: null,
+    paredes_4: null,
+});
+
+const puertas = ref({
+    puertas_1: null,
+    puertas_2: null,
+    puertas_3: null,
+    puertas_4: null,
+    puertas_5: null,
+});
+
+const piso = ref({
+    piso_1: null,
+    piso_2: null,
+    piso_3: null,
+    piso_4: null,
+});
+
+const techo = ref({
+    techo_1: null,
+    techo_2: null,
+    techo_3: null,
+});
+
+const seguridad = ref({
+    seguridad_1: null,
+    seguridad_2: null,
+    seguridad_3: null,
+    seguridad_4: null,
+});
+
 const novedades = ref(null);
 const registros = ref([]);
 
@@ -258,7 +511,12 @@ const router = useRouter();
 
 // Función para guardar la verificación
 const guardarVerificacion = async () => {
-    if (!usuario.value || usuario.value === 'null') {
+    if (!lugarInspeccionId.value || lugarInspeccionId.value === 'null') {
+        errorMsg.value = 'Por favor, seleccione el lugar de inspección.';
+        modalErrorInstance.value.show();
+        return;
+    }
+    if (!cargo.value || cargo.value === 'null') {
         errorMsg.value = 'Por favor, seleccione el nombre de quien verifica.';
         modalErrorInstance.value.show();
         return;
@@ -270,12 +528,14 @@ const guardarVerificacion = async () => {
         const response = await axios.post(
             `${apiUrl}/guardar_verificacion`,
             { 
-                usuario: usuario.value,
+                lugar_inspeccion_id: lugarInspeccionId.value,
+                responsable_verificacion_id: cargo.value,
+                aspectos_generales: aspectosGenerales.value,
+                paredes: paredes.value,
                 puertas: puertas.value,
-                ventanas: ventanas.value,
-                iluminacion_oficinas: iluminacionOficinas.value,
-                barreras_interiores: barrerasInteriores.value,
-                estado_camaras: estadoCamaras.value,
+                piso: piso.value,
+                techo: techo.value,
+                seguridad: seguridad.value,
                 novedades: novedades.value,
             },
             {
@@ -399,12 +659,40 @@ const exportarExcel = async () => {
 
 // Función para limpiar los campos del formulario
 const limpiar = () => {
-    usuario.value = null;
-    puertas.value = false;
-    ventanas.value = false;
-    iluminacionOficinas.value = false;
-    barrerasInteriores.value = false;
-    estadoCamaras.value = false;
+    lugarInspeccionId.value = null;
+    cargo.value = null;
+    responsables.value = [];
+    
+    // Limpiar todos los aspectos generales
+    Object.keys(aspectosGenerales.value).forEach(key => {
+        aspectosGenerales.value[key] = null;
+    });
+    
+    // Limpiar paredes
+    Object.keys(paredes.value).forEach(key => {
+        paredes.value[key] = null;
+    });
+    
+    // Limpiar puertas
+    Object.keys(puertas.value).forEach(key => {
+        puertas.value[key] = null;
+    });
+    
+    // Limpiar piso
+    Object.keys(piso.value).forEach(key => {
+        piso.value[key] = null;
+    });
+    
+    // Limpiar techo
+    Object.keys(techo.value).forEach(key => {
+        techo.value[key] = null;
+    });
+    
+    // Limpiar seguridad
+    Object.keys(seguridad.value).forEach(key => {
+        seguridad.value[key] = null;
+    });
+    
     novedades.value = null;
 };
 
@@ -414,10 +702,82 @@ const changePage = async (newPosition) => {
   await cargarDatos(); // Vuelve a cargar los datos con el nuevo límite y posición
 };
 
+// Función para limpiar los filtros de fecha
+const limpiarFiltros = async () => {
+  fechaDesde.value = null;
+  fechaHasta.value = null;
+  fechaDesdeFormateada.value = null;
+  fechaHastaFormateada.value = null;
+  position.value = 1; // Reiniciar a la primera página
+  await cargarDatos(); // Recargar datos sin filtros
+};
+
+// Función para cargar los lugares de inspección
+const cargarLugaresInspeccion = async () => {
+    try {
+        const response = await axios.post(
+            `${apiUrl}/obtener_lugares_inspeccion`,
+            {},
+            {
+                headers: {
+                    Accept: "application/json",
+                }
+            }
+        );
+        if (response.status === 200) {
+            lugaresInspeccion.value = response.data.data || [];
+        }
+    } catch (error) {
+        console.error('Error al cargar lugares de inspección:', error);
+        lugaresInspeccion.value = [];
+    }
+};
+
+// Función para cargar los responsables según el lugar de inspección
+const cargarResponsables = async (lugarId) => {
+    try {
+        loading.value = true;
+        loading_msg.value = 'Cargando responsables...';
+
+        const response = await axios.post(
+            `${apiUrl}/obtener_responsables_por_lugar`,
+            { lugar_id: lugarId },
+            {
+                headers: {
+                    Accept: "application/json",
+                }
+            }
+        );
+        if (response.status === 200) {
+            responsables.value = response.data.data || [];
+            // Limpiar selección de usuario si cambia el lugar
+            cargo.value = null;
+        }
+    } catch (error) {
+        console.error('Error al cargar responsables:', error);
+        responsables.value = [];
+        cargo.value = null;
+    } finally {
+        loading.value = false;
+        loading_msg.value = '';
+    }
+};
+
+// Watcher para detectar cambios en el lugar de inspección
+watch(lugarInspeccionId, (newValue) => {
+    if (newValue && newValue !== 'null') {
+        cargarResponsables(newValue);
+    } else {
+        responsables.value = [];
+        cargo.value = null;
+    }
+});
+
 // Código que se ejecuta al montar el componente
 onMounted(() => {
   modalInstance.value = new Modal(exitoModal);
   modalErrorInstance.value = new Modal(errorModal);
+  cargarLugaresInspeccion();
   cargarDatos();
 });
 
@@ -602,5 +962,111 @@ onMounted(() => {
     margin-top: 1.2rem;
     text-align: center;
     text-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+/* Estilos para la tabla de verificación */
+.tabla-verificacion-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+}
+
+.tabla-verificacion {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,40,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tabla-verificacion thead tr {
+    background: linear-gradient(90deg, #5dade2 0%, #3498db 100%);
+    color: white;
+}
+
+.tabla-verificacion th {
+    padding: 14px 12px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    border: 1px solid #2e86c1;
+    text-transform: uppercase;
+}
+
+.tabla-verificacion .col-aspecto {
+    background: linear-gradient(90deg, #2874a6 0%, #1f618d 100%);
+    width: 55%;
+    text-align: left;
+}
+
+.tabla-verificacion .col-opcion {
+    background: linear-gradient(90deg, #2874a6 0%, #1f618d 100%);
+    width: 15%;
+}
+
+.tabla-verificacion tbody tr.seccion-header {
+    background: linear-gradient(90deg, #2874a6 0%, #1f618d 100%);
+    color: white;
+    font-weight: bold;
+}
+
+.tabla-verificacion tbody tr.seccion-header td {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+    border: 1px solid #1b4f72;
+    text-align: left;
+    font-weight: 700;
+}
+
+.tabla-verificacion tbody tr:not(.seccion-header) {
+    background: #ebf5fb;
+}
+
+.tabla-verificacion tbody tr:not(.seccion-header):nth-child(even) {
+    background: #d6eaf8;
+}
+
+.tabla-verificacion tbody tr:not(.seccion-header):hover {
+    background: #aed6f1;
+    transition: background 0.2s;
+}
+
+.tabla-verificacion td {
+    padding: 12px 15px;
+    border: 1px solid #aed6f1;
+    text-align: center;
+}
+
+.tabla-verificacion .aspecto-cell {
+    text-align: left;
+    color: #21618c;
+    padding-left: 15px;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.tabla-verificacion .numero-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #3498db 0%, #2874a6 100%);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-right: 10px;
+    min-width: 35px;
+    text-align: center;
+}
+
+.tabla-verificacion .opcion-cell input[type="radio"] {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    accent-color: #3498db;
+}
+
+.tabla-verificacion .opcion-cell {
+    background: rgba(255, 255, 255, 0.7);
 }
 </style>
