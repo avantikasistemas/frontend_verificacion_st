@@ -13,6 +13,10 @@ RUN npm install
 # Copiar el resto del código
 COPY . .
 
+# Argumento para la URL del API (se pasa en tiempo de build)
+ARG VITE_API_URL=http://130.1.1.7:8002
+ENV VITE_API_URL=$VITE_API_URL
+
 # Construir la aplicación para producción
 RUN npm run build
 
