@@ -8,7 +8,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
+    // vueDevTools(),
   ],
   resolve: {
     alias: {
@@ -18,5 +18,17 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5182
-  }
+  },
+  build: {
+    // Asegurarse de que el output sea en dist/
+    outDir: 'dist',
+    // No fallar el build por warnings
+    rollupOptions: {
+      onwarn(warning, warn) {
+        // Ignorar warnings específicos si es necesario
+        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return
+        warn(warning)
+      }
+    }
+  },
 })
