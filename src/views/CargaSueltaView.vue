@@ -4,7 +4,7 @@
             <div class="general-header">
                 <div class="header-app">
                     <img :src="logotipo" :alt="logotipo" class="logo-app" />
-                    <h4 class="titulo-app">CARGA SUELTA</h4>
+                    <h4 class="titulo-app">LISTA DE CHEQUEO - INSPECCIONES</h4>
                 </div>
             </div>
             <div class="row">
@@ -15,7 +15,7 @@
                                 <div class="col-md-4">
                                     <label class="form-label"><strong>Tipo de inspección:</strong></label>
                                     <select class="form-select" v-model="tipoInspeccionId">
-                                        <option value="null">Seleccione</option>
+                                        <option :value="null">Seleccione</option>
                                         <option v-for="tipo in tiposInspeccion" :key="tipo.id" :value="tipo.id">
                                             {{ tipo.id }} - {{ tipo.nombre }}
                                         </option>
@@ -23,8 +23,65 @@
                                 </div>
                             </div>
 
+                            <!-- Campos de Aduana y Responsable (Aplican para todos los tipos) -->
+                            <div class="row mb-4" v-if="tipoInspeccionId">
+                                <div class="col-md-6">
+                                    <label class="form-label"><strong>Aduana:</strong></label>
+                                    <select class="form-select" v-model="aduanaId">
+                                        <option :value="null">Seleccione una aduana</option>
+                                        <option v-for="aduana in aduanas" :key="aduana.id" :value="aduana.id">
+                                            {{ aduana.nombre }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label"><strong>Responsable por Aduana:</strong></label>
+                                    <select class="form-select" v-model="responsableAduanaId" :disabled="!aduanaId">
+                                        <option :value="null">Seleccione un responsable</option>
+                                        <option v-for="responsable in responsablesPorAduana" :key="responsable.id" :value="responsable.id">
+                                            {{ responsable.nombre }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Campos adicionales según tipo de inspección -->
+                            <div class="row mb-4" v-if="tipoInspeccionId">
+                                <!-- Campos para Tipo 1: Carga Suelta -->
+                                <template v-if="tipoInspeccionId === 1">
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Número de Contenedor:</strong></label>
+                                        <input type="text" class="form-control" v-model="numeroContenedor" placeholder="Ingrese número de contenedor">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Número de Sello de Seguridad:</strong></label>
+                                        <input type="text" class="form-control" v-model="numeroSelloSeguridad" placeholder="Ingrese número de sello">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Documento de Transporte:</strong></label>
+                                        <input type="text" class="form-control" v-model="documentoTransporte" placeholder="Ingrese documento">
+                                    </div>
+                                </template>
+
+                                <!-- Campos para Tipo 2: Contenedores -->
+                                <template v-if="tipoInspeccionId === 2">
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Empresa de Transporte:</strong></label>
+                                        <input type="text" class="form-control" v-model="empresaTransporte" placeholder="Ingrese empresa de transporte">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Número de Contenedor:</strong></label>
+                                        <input type="text" class="form-control" v-model="numeroContenedor" placeholder="Ingrese número de contenedor">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label"><strong>Placa de Vehículo:</strong></label>
+                                        <input type="text" class="form-control" v-model="placaVehiculo" placeholder="Ingrese placa del vehículo">
+                                    </div>
+                                </template>
+                            </div>
+
                             <!-- Tabla de verificación -->
-                            <div class="tabla-verificacion-container" v-if="tipoInspeccionId && tipoInspeccionId !== 'null'">
+                            <div class="tabla-verificacion-container" v-if="tipoInspeccionId">
                                 <table class="tabla-verificacion">
                                     <thead>
                                         <tr>
@@ -82,7 +139,7 @@
                             </div>
 
                             <!-- Sección de imágenes -->
-                            <div class="row mt-4 mb-3" v-if="tipoInspeccionId && tipoInspeccionId !== 'null'">
+                            <div class="row mt-4 mb-3" v-if="tipoInspeccionId">
                                 <div class="col-md-12">
                                     <label class="form-label"><strong>Adjuntar Imágenes</strong></label>
                                     <div class="imagenes-container">
@@ -125,7 +182,7 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-3 mt-4" v-if="tipoInspeccionId && tipoInspeccionId !== 'null'">
+                            <div class="row mb-3 mt-4" v-if="tipoInspeccionId">
                                 <div class="col-md-12">
                                     <label class="form-label"><strong>Novedades</strong></label>        
                                     <textarea 
@@ -138,11 +195,13 @@
                                     <span class="text-end d-block small text-muted">{{ (novedades ? novedades.length : 0) }} / 300 caracteres</span>
                                 </div>
                             </div>
-                            <button class="btn btn-success" v-if="tipoInspeccionId && tipoInspeccionId !== 'null'">Guardar</button>
+                            <button class="btn btn-success" v-if="tipoInspeccionId">Guardar</button>
                         </form>
                     </div>
                 </div>
-                <div class="col-lg-12" v-if="registros.length > 0">
+
+                <!-- Tabla de registros - solo se muestra si hay tipo de inspección seleccionado -->
+                <div class="col-lg-12" v-if="tipoInspeccionId && registros.length > 0">
                     <div class="card p-4 mb-4">
                         <div class="row mb-4">
                             <h4>Listado de Registros</h4>
@@ -173,35 +232,30 @@
                                 <thead>
                                     <tr>
                                         <th>ID</th>
-                                        <th>LUGAR INSPECCIÓN</th>
-                                        <th>RESPONSABLE</th>
-                                        <th>HORA APERTURA Y FIN</th>
-                                        <th>CANTIDAD Y TIPO</th>
-                                        <th>SIN DAÑOS VISIBLES</th>
-                                        <th>EMPAQUE ADECUADO</th>
-                                        <th>ELEMENTOS NO DECLARADOS</th>
-                                        <th>CARGA ORGANIZADA</th>
-                                        <th>MANIPULACIÓN NO AUTORIZADA</th>
-                                        <th>PROTECCIÓN INTERNA</th>
-                                        <th>NOVEDADES</th>
+                                        <th>TIPO INSPECCIÓN</th>
                                         <th>FECHA CREACIÓN</th>
+                                        <th>NOVEDADES</th>
+                                        <th>ACCIONES</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="reg in registros" :key="reg.id">
                                         <td>{{ reg.id }}</td>
-                                        <td>{{ reg.nombre_lugar }}</td>
-                                        <td>{{ reg.nombre_responsable }}</td>
-                                        <td>{{ reg.aspectos_1 }}</td>
-                                        <td>{{ reg.aspectos_2 }}</td>
-                                        <td>{{ reg.aspectos_3 }}</td>
-                                        <td>{{ reg.aspectos_4 }}</td>
-                                        <td>{{ reg.aspectos_5 }}</td>
-                                        <td>{{ reg.aspectos_6 }}</td>
-                                        <td>{{ reg.aspectos_7 }}</td>
-                                        <td>{{ reg.aspectos_8 }}</td>
-                                        <td>{{ reg.novedades }}</td>
+                                        <td>{{ reg.tipo_inspeccion_nombre }}</td>
                                         <td>{{ reg.fecha_creacion }}</td>
+                                        <td>{{ truncarTexto(reg.novedades, 50) }}</td>
+                                        <td>
+                                            <button 
+                                                class="btn btn-info btn-sm" 
+                                                @click="verDetalle(reg)"
+                                                title="Ver detalle"
+                                            >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                    <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                                    <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                                </svg>
+                                            </button>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -294,6 +348,148 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal de detalle de inspección -->
+        <div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: linear-gradient(90deg, #5dade2 0%, #3498db 100%); color: white;">
+                        <h5 class="modal-title" id="detalleModalLabel">
+                            Detalle de Inspección #{{ detalleInspeccion?.id }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" v-if="detalleInspeccion">
+                        <!-- Información general -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><strong>Información General</strong></h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Tipo de Inspección:</strong> {{ detalleInspeccion.tipo_inspeccion_nombre }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Fecha de Creación:</strong> {{ detalleInspeccion.fecha_creacion }}</p>
+                                    </div>
+                                    
+                                    <!-- Campos adicionales para Tipo 1: Carga Suelta -->
+                                    <template v-if="detalleInspeccion.tipo_inspeccion_id === 1">
+                                        <div class="col-md-4" v-if="detalleInspeccion.numero_contenedor">
+                                            <p><strong>Número de Contenedor:</strong> {{ detalleInspeccion.numero_contenedor }}</p>
+                                        </div>
+                                        <div class="col-md-4" v-if="detalleInspeccion.numero_sello_seguridad">
+                                            <p><strong>Número de Sello de Seguridad:</strong> {{ detalleInspeccion.numero_sello_seguridad }}</p>
+                                        </div>
+                                        <div class="col-md-4" v-if="detalleInspeccion.documento_transporte">
+                                            <p><strong>Documento de Transporte:</strong> {{ detalleInspeccion.documento_transporte }}</p>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Campos adicionales para Tipo 2: Contenedores -->
+                                    <template v-if="detalleInspeccion.tipo_inspeccion_id === 2">
+                                        <div class="col-md-4" v-if="detalleInspeccion.empresa_transporte">
+                                            <p><strong>Empresa de Transporte:</strong> {{ detalleInspeccion.empresa_transporte }}</p>
+                                        </div>
+                                        <div class="col-md-4" v-if="detalleInspeccion.numero_contenedor">
+                                            <p><strong>Número de Contenedor:</strong> {{ detalleInspeccion.numero_contenedor }}</p>
+                                        </div>
+                                        <div class="col-md-4" v-if="detalleInspeccion.placa_vehiculo">
+                                            <p><strong>Placa de Vehículo:</strong> {{ detalleInspeccion.placa_vehiculo }}</p>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Campos de aduana (aplican a todos los tipos) -->
+                                    <div class="col-md-6" v-if="detalleInspeccion.aduana_nombre">
+                                        <p><strong>Aduana:</strong> {{ detalleInspeccion.aduana_nombre }}</p>
+                                    </div>
+                                    <div class="col-md-6" v-if="detalleInspeccion.responsable_aduana_nombre">
+                                        <p><strong>Responsable Aduana:</strong> {{ detalleInspeccion.responsable_aduana_nombre }}</p>
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        <p><strong>Novedades:</strong></p>
+                                        <p class="text-muted">{{ detalleInspeccion.novedades || 'Sin novedades' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aspectos evaluados -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><strong>Aspectos Evaluados</strong></h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="tabla-verificacion w-100">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-aspecto">Aspecto</th>
+                                            <th class="col-opcion text-center">Resultado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template v-for="(seccion, seccionIndex) in detalleInspeccion.aspectos" :key="`detalle_seccion_${seccion.seccion_id}`">
+                                            <tr class="seccion-header">
+                                                <td colspan="2">{{ seccionIndex + 1 }}. {{ seccion.seccion_nombre }}</td>
+                                            </tr>
+                                            <tr v-for="(aspecto, aspectoIndex) in seccion.aspectos" :key="`detalle_aspecto_${aspecto.aspecto_id}`">
+                                                <td class="aspecto-cell">
+                                                    <span class="numero-badge">{{ seccionIndex + 1 }}.{{ aspectoIndex + 1 }}</span> 
+                                                    {{ aspecto.aspecto_nombre }}
+                                                </td>
+                                                <td class="text-center">
+                                                    <span :class="{'text-success': aspecto.valor === '✔', 'text-danger': aspecto.valor === '✖', 'text-muted': aspecto.valor === 'N/A'}">
+                                                        <strong>{{ aspecto.valor }}</strong>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Imágenes adjuntas -->
+                        <div class="card" v-if="detalleInspeccion.imagenes && detalleInspeccion.imagenes.length > 0">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><strong>Imágenes Adjuntas ({{ detalleInspeccion.imagenes.length }})</strong></h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3" v-for="imagen in detalleInspeccion.imagenes" :key="imagen.id">
+                                        <div class="card">
+                                            <img 
+                                                :src="`${apiUrl.replace('/api', '')}/Uploads/${imagen.ruta_archivo}`" 
+                                                :alt="imagen.nombre_archivo"
+                                                class="card-img-top"
+                                                style="height: 200px; object-fit: cover; cursor: pointer;"
+                                                @click="abrirImagenCompleta(imagen)"
+                                            >
+                                            <div class="card-body p-2">
+                                                <small class="text-muted">{{ imagen.nombre_archivo }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card" v-else>
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><strong>Imágenes Adjuntas</strong></h6>
+                            </div>
+                            <div class="card-body text-center text-muted">
+                                <p>No hay imágenes adjuntas para esta inspección</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
         <!-- Overlay de carga -->
         <div v-if="loading" class="loading-overlay">
@@ -315,16 +511,25 @@ import logotipo from '@/assets/logotipo.png';
 import apiUrl from "../../config.js";
 import LayoutView from './Layouts/LayoutView.vue';
 
-const cargo = ref(null);
 const tipoInspeccionId = ref(null);
 const tiposInspeccion = ref([]);
-const lugarInspeccionId = ref(null);
-const lugaresInspeccion = ref([]);
-const responsables = ref([]);
 const fechaDesde = ref(null);
 const fechaHasta = ref(null);
 const fechaDesdeFormateada = ref(null);
 const fechaHastaFormateada = ref(null);
+
+// Campos adicionales según tipo de inspección
+const numeroContenedor = ref(null);
+const numeroSelloSeguridad = ref(null);
+const documentoTransporte = ref(null);
+const empresaTransporte = ref(null);
+const placaVehiculo = ref(null);
+
+// Campos de aduana y responsable
+const aduanaId = ref(null);
+const aduanas = ref([]);
+const responsableAduanaId = ref(null);
+const responsablesPorAduana = ref([]);
 
 const imagenes = ref([{ id: 1, base64: null, nombre: null }]);
 const contadorImagenes = ref(1);
@@ -334,6 +539,9 @@ const aspectosGeneralesDinamicos = ref({});
 
 const novedades = ref(null);
 const registros = ref([]);
+
+const detalleInspeccion = ref(null);
+const modalDetalleInstance = ref(null);
 
 const msg = ref('');
 const errorMsg = ref('');
@@ -354,18 +562,8 @@ const router = useRouter();
 
 // Función para guardar la verificación
 const guardarCarga = async () => {
-    if (!tipoInspeccionId.value || tipoInspeccionId.value === 'null') {
+    if (!tipoInspeccionId.value) {
         errorMsg.value = 'Por favor, seleccione el tipo de inspección.';
-        modalErrorInstance.value.show();
-        return;
-    }
-    if (!lugarInspeccionId.value || lugarInspeccionId.value === 'null') {
-        errorMsg.value = 'Por favor, seleccione el lugar de inspección.';
-        modalErrorInstance.value.show();
-        return;
-    }
-    if (!cargo.value || cargo.value === 'null') {
-        errorMsg.value = 'Por favor, seleccione el nombre de quien verifica.';
         modalErrorInstance.value.show();
         return;
     }
@@ -385,11 +583,18 @@ const guardarCarga = async () => {
             `${apiUrl}/guardar_carga`,
             { 
                 tipo_inspeccion_id: tipoInspeccionId.value,
-                lugar_inspeccion_id: lugarInspeccionId.value,
-                responsable_verificacion_id: cargo.value,
-                aspectos_generales: aspectosGeneralesDinamicos.value,
+                aspectos_generales_dinamicos: aspectosGeneralesDinamicos.value,
                 imagenes: imagenesConDatos,
                 novedades: novedades.value,
+                // Campos de aduana y responsable
+                aduana_id: aduanaId.value,
+                responsable_aduana_id: responsableAduanaId.value,
+                // Campos adicionales según tipo de inspección
+                numero_contenedor: numeroContenedor.value,
+                numero_sello_seguridad: numeroSelloSeguridad.value,
+                documento_transporte: documentoTransporte.value,
+                empresa_transporte: empresaTransporte.value,
+                placa_vehiculo: placaVehiculo.value,
             },
             {
                 headers: {
@@ -430,13 +635,13 @@ const cargarDatos = async () => {
         }
 
         const response = await axios.post(
-            `${apiUrl}/cargar_datos`, 
+            `${apiUrl}/cargar_datos_carga`, 
             {
+                tipo_inspeccion_id: tipoInspeccionId.value,
                 fecha_desde: fechaDesdeFormateada.value,
                 fecha_hasta: fechaHastaFormateada.value,
                 limit: parseInt(limit.value),
                 position: parseInt(position.value),
-                flag_excel: false,
             },
             {
                 headers: {
@@ -446,9 +651,9 @@ const cargarDatos = async () => {
         );
         if (response.status === 200) {
             registros.value = response.data.data.registros;
-            total_registros.value = response.data.data.total_registros;
-            total_paginas.value = response.data.data.total_pag;
-            position.value = response.data.data.posicion_pag;
+            total_registros.value = response.data.data.cant_registros;
+            // Calcular total de páginas
+            total_paginas.value = Math.ceil(total_registros.value / parseInt(limit.value));
         }
     } catch (error) {
         console.error(error);
@@ -513,9 +718,6 @@ const exportarExcel = async () => {
 // Función para limpiar los campos del formulario
 const limpiar = () => {
     tipoInspeccionId.value = null;
-    lugarInspeccionId.value = null;
-    cargo.value = null;
-    responsables.value = [];
     
     // Limpiar aspectos dinámicos
     aspectosGeneralesDinamicos.value = {};
@@ -526,6 +728,18 @@ const limpiar = () => {
     contadorImagenes.value = 1;
     
     novedades.value = null;
+    
+    // Limpiar campos adicionales
+    numeroContenedor.value = null;
+    numeroSelloSeguridad.value = null;
+    documentoTransporte.value = null;
+    empresaTransporte.value = null;
+    placaVehiculo.value = null;
+    
+    // Limpiar campos de aduana
+    aduanaId.value = null;
+    responsableAduanaId.value = null;
+    responsablesPorAduana.value = [];
 };
 
 // Función para agregar un nuevo input de imagen
@@ -616,11 +830,12 @@ const cargarTiposInspeccion = async () => {
     }
 };
 
-// Función para cargar los lugares de inspección
-const cargarLugaresInspeccion = async () => {
+// Función para cargar las aduanas
+const cargarAduanas = async () => {
     try {
+        console.log('Intentando cargar aduanas...');
         const response = await axios.post(
-            `${apiUrl}/obtener_lugares_inspeccion`,
+            `${apiUrl}/obtener_aduanas`,
             {},
             {
                 headers: {
@@ -628,42 +843,38 @@ const cargarLugaresInspeccion = async () => {
                 }
             }
         );
+        console.log('Respuesta de aduanas:', response.data);
         if (response.status === 200) {
-            lugaresInspeccion.value = response.data.data || [];
+            aduanas.value = response.data.data || [];
+            console.log('Aduanas cargadas:', aduanas.value);
         }
     } catch (error) {
-        console.error('Error al cargar lugares de inspección:', error);
-        lugaresInspeccion.value = [];
+        console.error('Error al cargar aduanas:', error);
+        aduanas.value = [];
     }
 };
 
-// Función para cargar los responsables según el lugar de inspección
-const cargarResponsables = async (lugarId) => {
+// Función para cargar los responsables por aduana
+const cargarResponsablesPorAduana = async (aduana_id) => {
     try {
-        loading.value = true;
-        loading_msg.value = 'Cargando responsables...';
-
+        console.log('Cargando responsables para aduana:', aduana_id);
         const response = await axios.post(
-            `${apiUrl}/obtener_responsables_por_lugar`,
-            { lugar_id: lugarId },
+            `${apiUrl}/obtener_responsables_por_aduana`,
+            { aduana_id: aduana_id },
             {
                 headers: {
                     Accept: "application/json",
                 }
             }
         );
-        if (response.status === 200) {
-            responsables.value = response.data.data || [];
-            // Limpiar selección de usuario si cambia el lugar
-            cargo.value = null;
+        console.log('Respuesta de responsables:', response.data);
+        if (response.status === 200 && response.data.code === 200) {
+            responsablesPorAduana.value = response.data.data || [];
+            console.log('Responsables cargados:', responsablesPorAduana.value);
         }
     } catch (error) {
-        console.error('Error al cargar responsables:', error);
-        responsables.value = [];
-        cargo.value = null;
-    } finally {
-        loading.value = false;
-        loading_msg.value = '';
+        console.error('Error al cargar responsables por aduana:', error);
+        responsablesPorAduana.value = [];
     }
 };
 
@@ -705,32 +916,76 @@ const cargarAspectosPorTipo = async (tipoInspeccionId) => {
 };
 
 // Watcher para detectar cambios en el tipo de inspección
-watch(tipoInspeccionId, (newValue) => {
-    if (newValue && newValue !== 'null') {
+watch(tipoInspeccionId, (newValue, oldValue) => {
+    if (newValue) {
         cargarAspectosPorTipo(newValue);
+        cargarDatos(); // Cargar los datos cuando se selecciona un tipo
+        
+        // Limpiar campos adicionales cuando cambia el tipo de inspección
+        if (oldValue !== newValue) {
+            numeroContenedor.value = null;
+            numeroSelloSeguridad.value = null;
+            documentoTransporte.value = null;
+            empresaTransporte.value = null;
+            placaVehiculo.value = null;
+            aduanaId.value = null;
+            responsableAduanaId.value = null;
+            responsablesPorAduana.value = [];
+        }
     } else {
         aspectosCarga.value = [];
         aspectosGeneralesDinamicos.value = {};
+        numeroContenedor.value = null;
+        numeroSelloSeguridad.value = null;
+        documentoTransporte.value = null;
+        empresaTransporte.value = null;
+        placaVehiculo.value = null;
+        aduanaId.value = null;
+        responsableAduanaId.value = null;
+        responsablesPorAduana.value = [];
     }
 });
 
-// Watcher para detectar cambios en el lugar de inspección
-watch(lugarInspeccionId, (newValue) => {
-    if (newValue && newValue !== 'null') {
-        cargarResponsables(newValue);
+// Watcher para detectar cambios en aduana y cargar responsables
+watch(aduanaId, (newValue) => {
+    if (newValue) {
+        cargarResponsablesPorAduana(newValue);
     } else {
-        responsables.value = [];
-        cargo.value = null;
+        responsablesPorAduana.value = [];
+        responsableAduanaId.value = null;
     }
 });
+
+// Función para truncar texto
+const truncarTexto = (texto, maxLength) => {
+    if (!texto) return '-';
+    if (texto.length <= maxLength) return texto;
+    return texto.substring(0, maxLength) + '...';
+};
+
+// Función para ver detalle de una inspección
+const verDetalle = (inspeccion) => {
+    detalleInspeccion.value = inspeccion;
+    modalDetalleInstance.value.show();
+};
+
+// Función para abrir imagen en nueva pestaña
+const abrirImagenCompleta = (imagen) => {
+    const url = `${apiUrl.replace('/api', '')}/Uploads/${imagen.ruta_archivo}`;
+    window.open(url, '_blank');
+};
 
 // Código que se ejecuta al montar el componente
 onMounted(() => {
   modalInstance.value = new Modal(exitoModal);
   modalErrorInstance.value = new Modal(errorModal);
+  const modalDetalleElement = document.getElementById('detalleModal');
+  if (modalDetalleElement) {
+    modalDetalleInstance.value = new Modal(modalDetalleElement);
+  }
   cargarTiposInspeccion();
-  cargarLugaresInspeccion();
-  cargarDatos();
+  cargarAduanas();
+  // No cargar datos automáticamente, solo cuando se seleccione un tipo
 });
 
 </script>
@@ -1099,5 +1354,23 @@ onMounted(() => {
     background: linear-gradient(90deg, #2874a6 0%, #1f618d 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Botón de ver detalle con ícono */
+.btn-info {
+    background: linear-gradient(90deg, #5dade2 0%, #3498db 100%);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-info:hover {
+    background: linear-gradient(90deg, #3498db 0%, #2874a6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.4);
 }
 </style>
