@@ -26,7 +26,7 @@
                             <!-- Campos de Aduana y Responsable (Aplican para todos los tipos) -->
                             <div class="row mb-4" v-if="tipoInspeccionId">
                                 <div class="col-md-6">
-                                    <label class="form-label"><strong>Aduana:</strong></label>
+                                    <label class="form-label"><strong>Punto de Ingreso Aduanero:</strong></label>
                                     <select class="form-select" v-model="aduanaId">
                                         <option :value="null">Seleccione una aduana</option>
                                         <option v-for="aduana in aduanas" :key="aduana.id" :value="aduana.id">
@@ -35,7 +35,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label"><strong>Responsable por Aduana:</strong></label>
+                                    <label class="form-label"><strong>Responsable:</strong></label>
                                     <select class="form-select" v-model="responsableAduanaId" :disabled="!aduanaId">
                                         <option :value="null">Seleccione un responsable</option>
                                         <option v-for="responsable in responsablesPorAduana" :key="responsable.id" :value="responsable.id">
@@ -445,7 +445,7 @@
                                                     {{ aspecto.aspecto_nombre }}
                                                 </td>
                                                 <td class="text-center">
-                                                    <span :class="{'text-success': aspecto.valor === '✔', 'text-danger': aspecto.valor === '✖', 'text-muted': aspecto.valor === 'N/A'}">
+                                                    <span :class="{'text-success': aspecto.valor === 'SI', 'text-danger': aspecto.valor === 'NO', 'text-muted': aspecto.valor === 'NO APLICA'}">
                                                         <strong>{{ aspecto.valor }}</strong>
                                                     </span>
                                                 </td>
@@ -684,12 +684,13 @@ const exportarExcel = async () => {
         }
 
         const response = await axios.post(
-            `${apiUrl}/cargar_datos`, 
+            `${apiUrl}/cargar_datos_carga`, 
             {
+                tipo_inspeccion_id: tipoInspeccionId.value,
                 fecha_desde: fechaDesdeFormateada.value,
                 fecha_hasta: fechaHastaFormateada.value,
-                limit: parseInt(limit.value),
-                position: parseInt(position.value),
+                limit: 1000, // Traer todos los registros para el Excel
+                position: 1,
                 flag_excel: true,
             },
             {
@@ -704,7 +705,11 @@ const exportarExcel = async () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `reporte_verificacion.xlsx`);
+            
+            // Obtener el nombre del tipo de inspección para el archivo
+            const tipoNombre = tiposInspeccion.value.find(t => t.id === tipoInspeccionId.value)?.nombre || 'inspeccion';
+            link.setAttribute('download', `inspeccion_${tipoNombre.replace(/ /g, '_')}_${new Date().getTime()}.xlsx`);
+            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -713,7 +718,7 @@ const exportarExcel = async () => {
     } catch (error) {
         console.error(error);
         modalErrorInstance.value.show();
-        errorMsg.value = 'Error al cargar los datos.';
+        errorMsg.value = 'Error al exportar los datos.';
     } finally {
         loading.value = false;
         loading_msg.value = '';

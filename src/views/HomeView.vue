@@ -365,7 +365,7 @@
                                                     {{ aspecto.nombre }}
                                                 </td>
                                                 <td class="text-center">
-                                                    <span :class="{'text-success': aspecto.valor === '✔', 'text-danger': aspecto.valor === '✖', 'text-muted': aspecto.valor === 'NA'}">
+                                                    <span :class="{'text-success': aspecto.valor === 'SI', 'text-danger': aspecto.valor === 'NO', 'text-muted': aspecto.valor === 'NO APLICA'}">
                                                         <strong>{{ aspecto.valor }}</strong>
                                                     </span>
                                                 </td>
@@ -592,10 +592,11 @@ const exportarExcel = async () => {
         const response = await axios.post(
             `${apiUrl}/cargar_datos`, 
             {
+                lugar_inspeccion_id: lugarInspeccionId.value,
                 fecha_desde: fechaDesdeFormateada.value,
                 fecha_hasta: fechaHastaFormateada.value,
-                limit: parseInt(limit.value),
-                position: parseInt(position.value),
+                limit: 1000, // Traer todos los registros para el Excel
+                position: 1,
                 flag_excel: true,
             },
             {
@@ -610,7 +611,11 @@ const exportarExcel = async () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `reporte_verificacion.xlsx`);
+            
+            // Obtener el nombre del lugar de inspección para el archivo
+            const lugarNombre = lugaresInspeccion.value.find(l => l.id === lugarInspeccionId.value)?.nombre || 'verificacion';
+            link.setAttribute('download', `verificacion_${lugarNombre.replace(/ /g, '_')}_${new Date().getTime()}.xlsx`);
+            
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -619,7 +624,7 @@ const exportarExcel = async () => {
     } catch (error) {
         console.error(error);
         modalErrorInstance.value.show();
-        errorMsg.value = 'Error al cargar los datos.';
+        errorMsg.value = 'Error al exportar los datos.';
     } finally {
         loading.value = false;
         loading_msg.value = '';
