@@ -141,7 +141,12 @@
                             <!-- Sección de imágenes -->
                             <div class="row mt-4 mb-3" v-if="tipoInspeccionId">
                                 <div class="col-md-12">
-                                    <label class="form-label"><strong>Adjuntar Imágenes</strong></label>
+                                    <label class="form-label">
+                                        <strong>Adjuntar Imágenes</strong>
+                                        <span style="color: red; font-size: 0.9rem; margin-left: 10px;">
+                                            Las imágenes deben tener un respaldo de marca de agua con la fecha y ubicación.
+                                        </span>
+                                    </label>
                                     <div class="imagenes-container">
                                         <div v-for="(imagen, index) in imagenes" :key="imagen.id" class="imagen-item">
                                             <div class="input-group mb-2">
