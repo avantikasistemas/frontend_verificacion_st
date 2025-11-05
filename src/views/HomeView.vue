@@ -156,7 +156,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="col-lg-12" v-if="lugarInspeccionId && lugarInspeccionId !== 'null' && registros.length > 0">
+                <div class="col-lg-12" v-if="lugarInspeccionId && lugarInspeccionId !== 'null'">
                     <div class="card p-4 mb-4">
                         <div class="row mb-4">
                             <h4>Listado de Registros</h4>
@@ -175,14 +175,26 @@
                                         <button class="btn btn-danger" @click="limpiarFiltros()">Limpiar filtros</button>
                                     </div>
                                 </div>
-                                <div style="align-self: center;">
+                                <div style="align-self: center;" v-if="registros.length > 0">
                                     <button class="btn-excel" @click="exportarExcel">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#217346" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="3" width="18" height="18" rx="2" fill="#fff" stroke="#217346"/><path d="M8 8l8 8M16 8l-8 8" stroke="#217346"/><rect x="6" y="6" width="12" height="12" rx="1" fill="#d6f5e3" stroke="#217346"/></svg>
                                         Exportar Excel
                                     </button>
                                 </div>
                             </div>
-                            <div class="tabla-scroll">
+                            
+                            <!-- Mensaje cuando no hay datos -->
+                            <div v-if="registros.length === 0" class="no-data-message">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                                </svg>
+                                <h5>No se encontraron registros</h5>
+                                <p>No hay datos para mostrar con los filtros aplicados.</p>
+                                <p class="text-muted">Intenta cambiar los filtros de fecha o seleccionar otro lugar de inspección.</p>
+                            </div>
+                            
+                            <!-- Tabla de registros -->
+                            <div class="tabla-scroll" v-else>
                             <table class="tabla-registros w-100">
                                 <thead>
                                     <tr>
@@ -1227,5 +1239,42 @@ onMounted(() => {
     background: linear-gradient(90deg, #2874a6 0%, #1f618d 100%);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+}
+
+/* Mensaje de no hay datos */
+.no-data-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 12px;
+    margin-top: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 40, 0.08);
+}
+
+.no-data-message svg {
+    color: #64b5f6;
+    margin-bottom: 20px;
+    opacity: 0.8;
+}
+
+.no-data-message h5 {
+    color: #1976d2;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.no-data-message p {
+    color: #1565c0;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.no-data-message .text-muted {
+    color: #64b5f6 !important;
+    font-size: 0.9rem;
 }
 </style>
