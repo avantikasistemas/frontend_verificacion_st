@@ -1,17 +1,55 @@
 <template>
   <nav class="navbar">
     <div class="navbar-left navbar-links">
-      <router-link to="/" class="nav-link">Lista de Checkeo</router-link>
+      <router-link to="/main" class="nav-link">Lista de Checkeo</router-link>
       <router-link to="/carga" class="nav-link">Carga Suelta</router-link>
       <!-- <router-link to="/generico" class="nav-link">Creación de Genéricos</router-link> -->
+    </div>
+    
+    <div class="navbar-right">
+      <div class="user-info">
+        <i class="bi bi-person-circle"></i>
+        <span class="user-name">{{ userName }}</span>
+      </div>
+      <button @click="handleLogout" class="btn-logout">
+        <i class="bi bi-box-arrow-right"></i>
+        Cerrar Sesión
+      </button>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
+const userName = ref('Usuario');
+
+onMounted(() => {
+  // Obtener usuario desde localStorage
+  const userStr = localStorage.getItem('user');
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user && user.nombre) {
+        userName.value = user.nombre;
+      }
+    } catch (error) {
+      console.error('Error al parsear datos de usuario:', error);
+    }
+  }
+});
+
+const handleLogout = () => {
+  if (confirm('¿Está seguro que desea cerrar sesión?')) {
+    // Limpiar localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    // Redirigir al login
+    router.push('/');
+  }
+};
 </script>
 
 <style scoped>
@@ -81,5 +119,73 @@ const router = useRouter()
   background: #2778bf;
   color: #fff !important;
   box-shadow: 0 2px 12px rgba(39,120,191,0.12);
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #2778bf;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.user-info i {
+  font-size: 1.5rem;
+}
+
+.user-name {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.btn-logout i {
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .navbar-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-name {
+    max-width: 100px;
+  }
 }
 </style>

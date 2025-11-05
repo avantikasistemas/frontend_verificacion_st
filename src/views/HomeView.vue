@@ -189,6 +189,7 @@
                                         <th>ID</th>
                                         <th>LUGAR INSPECCIÓN</th>
                                         <th>RESPONSABLE</th>
+                                        <th>USUARIO</th>
                                         <th>FECHA CREACIÓN</th>
                                         <th>NOVEDADES</th>
                                         <th>ACCIONES</th>
@@ -199,6 +200,7 @@
                                         <td>{{ reg.id }}</td>
                                         <td>{{ reg.lugar_inspeccion }}</td>
                                         <td>{{ reg.responsable_verificacion }}</td>
+                                        <td>{{ reg.usuario || 'N/A' }}</td>
                                         <td>{{ reg.fecha_creacion }}</td>
                                         <td>{{ truncarTexto(reg.novedades, 50) }}</td>
                                         <td>
@@ -436,6 +438,38 @@ import logotipo from '@/assets/logotipo.png';
 import apiUrl from "../../config.js";
 import LayoutView from './Layouts/LayoutView.vue';
 
+const router = useRouter();
+
+// Configurar interceptor de axios para incluir token en todas las peticiones
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token && !config.url.includes('/login')) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor para manejar errores de autenticación (token expirado)
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // Token expirado o inválido
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      if (router.currentRoute.value.path !== '/') {
+        router.push('/');
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 const cargo = ref(null);
 const lugarInspeccionId = ref(null);
 const lugaresInspeccion = ref([]);
@@ -474,8 +508,6 @@ const total_paginas = ref(0);
 const total_registros = ref(0);
 const limit = ref(10);
 const position = ref(1);
-
-const router = useRouter();
 
 // Función para guardar la verificación
 const guardarVerificacion = async () => {
